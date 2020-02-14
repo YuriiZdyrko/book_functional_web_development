@@ -1,0 +1,10 @@
+A nice way to alias multiple things
+alias IslandsEngine.{Coordinate, Guesses}
+
+iex> r ModuleName
+recompile module
+
+iex(7)> r Island
+warning: redefining module IslandsEngine.Island (current version loaded from _build/dev/lib/islands_engine/ebin/Elixir.IslandsEngine.Island.beam)
+  lib/islands_engine/island.ex:1
+
