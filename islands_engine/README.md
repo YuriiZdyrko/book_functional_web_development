@@ -1,21 +1,16 @@
 # IslandsEngine
 
-**TODO: Add description**
+## Details
 
-## Installation
+Stateless modules:
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `islands_engine` to your list of dependencies in `mix.exs`:
+The Board module knows how to position an island with a key and a full island. 
 
-```elixir
-def deps do
-  [
-    {:islands_engine, "~> 0.1.0"}
-  ]
-end
-```
+The Coordinate module can turn the row and column value into a coordinate. 
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/islands_engine](https://hexdocs.pm/islands_engine).
+The Island module can turn the island key and the coordinate into a island. 
 
+
+Stateful modules:
+
+The Game module coordinates between these, keeps state, validates input, and forms a response.

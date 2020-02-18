@@ -11,3 +11,17 @@ warning: redefining module IslandsEngine.Island (current version loaded from _bu
 iex> r ModuleName -> recompile module
 iex> r ModuleName -> recompile module
 
+GenServer.start_link -> init()
+GenServer.call -> handle_call()
+GenServer.cast -> handle_cast()
+
+
+iex> pro tips <xei
+
+View state:
+:sys.get_state(game)
+
+Replace state:
+:sys.replace_state pid, &(&1 | key: new_value) end
+
+ᴉǝx> sdᴉʇ oɹd <xǝᴉ
