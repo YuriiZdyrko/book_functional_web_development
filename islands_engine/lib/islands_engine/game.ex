@@ -1,17 +1,25 @@
 defmodule IslandsEngine.Game do
-  use GenServer
+  use GenServer,
+    # start: {__MODULE__, :start_link, []},
+    restart: :transient
 
   alias IslandsEngine.{Board, Coordinate, Guesses, Island, Rules}
 
   @players [:player1, :player2]
 
+  # If Game process mailbox doesn't receive any message in 15000, it'll be sent
+  # a :timeout message, and handle it in   handle_info(:timeout).
+  # To be able to test it, uncomment smaller value.
+  # @timeout 15000
+  @timeout 60 * 60 * 24 * 1000
+
   def start_link(name) when is_binary(name),
-    do: GenServer.start_link(__MODULE__, name, name: via_tuple(__MODULE__))
+    do: GenServer.start_link(__MODULE__, name, name: via_tuple(name))
 
   def init(name) do
-    player1 = %{name: name, board: Board.new(), guesses: Guesses.new()}
-    player2 = %{name: nil, board: Board.new(), guesses: Guesses.new()}
-    {:ok, %{player1: player1, player2: player2, rules: %Rules{}}}
+    send(self(), {:set_state, name})
+    IO.inspect("Game: #{name} is up!")
+    {:ok, fresh_state(name)}
   end
 
   def add_player(game, name) when is_binary(name),
@@ -98,14 +106,55 @@ defmodule IslandsEngine.Game do
     end
   end
 
+  @doc """
+  Tagging return tuple with :stop causes Behaviour to 
+  trigger the terminate/2 callback
+  """
+  def handle_info(:timeout, state_data) do
+    {:stop, {:shutdown, :timeout}, state_data}
+  end
+
+  @doc """
+  Clean up :ets only if terminated due to timeout
+  """
+  def terminate({:shutdown, :timeout}, state_data) do
+    :ets.delete(:game_state, state_data.player1.name)
+    :ok
+  end
+
+  def terminate(_reason, _state), do: :ok
+
+  @doc """
+  Doing initialization in handle_info allows to unblock 
+  calling process (GameSupervisor) immediately.
+  But there's a small potential for a race condition if:
+  - init returns with a fresh_state
+  - someone does :add_player, "player 2"
+  - handle_info({:set_state, name}) erases "player 2" by
+    applying stored :ets state
+  """
+  def handle_info({:set_state, name}, _state_data) do
+    state_data =
+      case :ets.lookup(:game_state, name) do
+        [] -> fresh_state(name)
+        [{_key, state}] -> state
+      end
+
+    :ets.insert(:game_state, {name, state_data})
+
+    {:noreply, state_data, @timeout}
+  end
+
   defp update_player2_name(state_data, name),
     do: put_in(state_data.player2.name, name)
 
   defp update_rules(state_data, rules),
     do: %{state_data | rules: rules}
 
-  defp reply_success(state_data, reply),
-    do: {:reply, reply, state_data}
+  defp reply_success(state_data, reply) do
+    :ets.insert(:game_state, {state_data.player1.name, state_data})
+    {:reply, reply, state_data, @timeout}
+  end
 
   defp player_board(state_data, player),
     do: Map.get(state_data, player).board
@@ -123,4 +172,10 @@ defmodule IslandsEngine.Game do
   end
 
   def via_tuple(name), do: {:via, Registry, {Registry.Game, name}}
+
+  defp fresh_state(name) do
+    player1 = %{name: name, board: Board.new(), guesses: Guesses.new()}
+    player2 = %{name: nil, board: Board.new(), guesses: Guesses.new()}
+    %{player1: player1, player2: player2, rules: %Rules{}}
+  end
 end

@@ -6,8 +6,11 @@ defmodule IslandsEngine.Application do
   use Application
 
   def start(_type, _args) do
+    :ets.new(:game_state, [:public, :named_table])
+
     children = [
-      {Registry, keys: :unique, name: Registry.Game}
+      {Registry, keys: :unique, name: Registry.Game},
+      IslandsEngine.GameSupervisor
       # Starts a worker by calling: IslandsEngine.Worker.start_link(arg)
       # {IslandsEngine.Worker, arg}
     ]

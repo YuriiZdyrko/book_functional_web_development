@@ -45,7 +45,6 @@ defmodule Chapter4Test do
     GenServer.start_link(Game, "Lena", name: via)
     :sys.get_state(via) |> IO.inspect()
 
-    {:error, {:already_started, _pid}} =
-        GenServer.start_link(Game, "Lena", name: via)
+    {:error, {:already_started, _pid}} = GenServer.start_link(Game, "Lena", name: via)
   end
 end

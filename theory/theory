@@ -25,3 +25,16 @@ Replace state:
 :sys.replace_state pid, &(&1 | key: new_value) end
 
 ᴉǝx> sdᴉʇ oɹd <xǝᴉ
+
+
+The design they came up with is the supervisor Behaviour. 
+It extracts error handling code from business logic into its own modules. 
+Supervisor modules spawn supervisor processes that link to other processes and watch for failure, 
+restarting those linked processes if they crash.
+This separation of concerns makes our code clearer and easier to maintain. 
+It keeps our business logic free of diversions for handling exceptions. 
+We end up writing more confident code that assumes success, 
+but supervisors always have our back when things go wrong.
+
+View automatically generated child_spec:
+Game.child_spec("init_arg")
