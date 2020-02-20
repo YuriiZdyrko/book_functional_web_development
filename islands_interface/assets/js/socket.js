@@ -6,9 +6,15 @@
 //
 // Pass the token on params as below. Or remove it
 // from the params if you are not using authentication.
-import {Socket} from "phoenix"
+import {
+  Socket
+} from "phoenix"
 
-let socket = new Socket("/socket", {params: {token: window.userToken}})
+window.socket = new Socket("/socket", {
+  params: {
+      token: window.userToken
+  }
+})
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,
@@ -54,10 +60,65 @@ let socket = new Socket("/socket", {params: {token: window.userToken}})
 // Finally, connect to the socket:
 socket.connect()
 
+// var new_channel = socket.channel("topic:subtopic", {some_key: "some_value"})
+
+window.new_channel = function(subtopic, screen_name) {
+  return socket.channel("game:" + subtopic, {
+      screen_name: screen_name
+  });
+}
+window.join = function(channel) {
+  channel.join()
+      .receive("ok", response => {
+          console.log("Joined successfully!", response)
+      })
+      .receive("error", response => {
+          console.log("Unable to join", response)
+      })
+}
+
+window.leave = function(channel) {
+  channel.leave()
+      .receive("ok", response => {
+          console.log("Left successfully", response)
+      })
+      .receive("error", response => {
+          console.log("Unable to leave", response)
+      })
+}
+
+window.say_hello = function(channel, greeting) {
+  channel.push("hello", {
+          "message": greeting
+      })
+      .receive("ok", response => {
+          console.log("Hello", response.message)
+      })
+      .receive("error", response => {
+          console.log("Unable to say hello to the channel.", response.message)
+      })
+}
+
+
+/**
+ * Paste into browser console:
+ * 
+var game_channel = new_channel("moon", "moon")
+join(game_channel)
+// setTimeout(() => leave(game_channel), 1000)
+say_hello(game_channel, "yo man!")
+
+// Handle Pushes and Broadcasts
+game_channel.on(
+  "said_hello", 
+  response => console.log("Returned Greeting:", response.message)
+)
+**/
+
 // Now that you are connected, you can join channels with a topic:
-let channel = socket.channel("topic:subtopic", {})
-channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
-  .receive("error", resp => { console.log("Unable to join", resp) })
+// let channel = socket.channel("topic:subtopic", {})
+// channel.join()
+//   .receive("ok", resp => { console.log("Joined successfully", resp) })
+//   .receive("error", resp => { console.log("Unable to join", resp) })
 
 export default socket

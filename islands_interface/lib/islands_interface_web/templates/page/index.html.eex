@@ -1,4 +1,12 @@
+<section class="phx-hero">
+  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
+  <p>A productive web framework that<br/>does not compromise speed or maintainability.</p>
+</section>
 
+<section class="row">
+  <article class="column">
+    <h2>My stuff</h2>
+    
 <div class="jumbotron">
 <h2><%= gettext "Welcome to %{name}", name: "Phoenix!" %></h2> <p class="lead">
 A productive web framework that does not compromise speed and
@@ -9,3 +17,19 @@ A productive web framework that does not compromise speed and
 [tag(:input, type: "text", name: "name"),
 tag(:input, type: "submit", value: "New Game")] end%>
 </p> </div>
+  </article>
+  <article class="column">
+    <h2>Help</h2>
+    <ul>
+      <li>
+        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
+      </li>
+      <li>
+        <a href="https://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on Freenode IRC</a>
+      </li>
+      <li>
+        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
+      </li>
+    </ul>
+  </article>
+</section>

@@ -20,8 +20,6 @@ defmodule IslandsInterfaceWeb.Router do
     post "/test", PageController, :test
   end
 
-  
-
   # Other scopes may use custom stacks.
   # scope "/api", IslandsInterfaceWeb do
   #   pipe_through :api
