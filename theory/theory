@@ -38,3 +38,26 @@ but supervisors always have our back when things go wrong.
 
 View automatically generated child_spec:
 Game.child_spec("init_arg")
+
+--- Application Behaviour module ----
+
+mix.exs: name, version, compile and run-time dependencies
+application.ex: start top-level supervisor
+
+To run application, not listed in deps:
+def application do [extra_applications: [:logger],
+
+To turn run-time application into compile-times:
+defp deps do
+  [{:some_new_dep, "> 0.0.0", runtime: false}]
+end
+
+Useful methods:
+:application.which_applications
+
+Start necessary dependencies:
+:application.ensure_all_started(:islands_engine)
+
+:application.start(:islands_engine)
+:application.stop(:islands_engine)
+
