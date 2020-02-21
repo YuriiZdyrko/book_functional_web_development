@@ -1,4 +1,22 @@
 defmodule IslandsEngine.Game do
+  @moduledoc """
+  Holds Game state
+  To inspect state in iex console:
+  iex>
+    alias IslandsEngine.Game
+    via = Game.via_tuple("moon")
+    :sys.get_state(via)
+
+  Hack to avoid setting all islands for players:
+  iex>
+    state_data = :sys.replace_state(
+      via, 
+      fn state_data ->
+         %{state_data | rules: %IslandsEngine.Rules{state: :player1_turn}}
+    end)
+  """
+
+
   use GenServer,
     # start: {__MODULE__, :start_link, []},
     restart: :transient

@@ -61,3 +61,12 @@ Start necessary dependencies:
 :application.start(:islands_engine)
 :application.stop(:islands_engine)
 
+Atom conversion:
+Use String.to_existing_atom/1 to convert user-generated strings into atoms.
+This prevents hacking attacks when user sends millions of strings, 
+and memory overflows because atoms are not garbage collected.
+
+TIP:
+To overcome ** (Protocol.UndefinedError) protocol Jason.Encoder not implemented for %IslandsEngine.Island
+Use inspect(board) when sending response to connect term to string.
+

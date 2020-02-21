@@ -12,7 +12,7 @@ import {
 
 window.socket = new Socket("/socket", {
   params: {
-      token: window.userToken
+    token: window.userToken
   }
 })
 
@@ -64,41 +64,96 @@ socket.connect()
 
 window.new_channel = function(subtopic, screen_name) {
   return socket.channel("game:" + subtopic, {
-      screen_name: screen_name
+    screen_name: screen_name
   });
 }
 window.join = function(channel) {
   channel.join()
-      .receive("ok", response => {
-          console.log("Joined successfully!", response)
-      })
-      .receive("error", response => {
-          console.log("Unable to join", response)
-      })
+    .receive("ok", response => {
+      console.log("Joined successfully!", response)
+    })
+    .receive("error", response => {
+      console.log("Unable to join", response)
+    })
 }
 
 window.leave = function(channel) {
   channel.leave()
-      .receive("ok", response => {
-          console.log("Left successfully", response)
-      })
-      .receive("error", response => {
-          console.log("Unable to leave", response)
-      })
+    .receive("ok", response => {
+      console.log("Left successfully", response)
+    })
+    .receive("error", response => {
+      console.log("Unable to leave", response)
+    })
 }
 
 window.say_hello = function(channel, greeting) {
   channel.push("hello", {
-          "message": greeting
-      })
-      .receive("ok", response => {
-          console.log("Hello", response.message)
-      })
-      .receive("error", response => {
-          console.log("Unable to say hello to the channel.", response.message)
-      })
+      "message": greeting
+    })
+    .receive("ok", response => {
+      console.log("Hello", response.message)
+    })
+    .receive("error", response => {
+      console.log("Unable to say hello to the channel.", response.message)
+    })
 }
 
+window.new_game = function(channel) {
+  channel.push("new_game")
+    .receive("ok", response => {
+      console.log("New Game!", response)
+    })
+    .receive("error", response => {
+      console.log("Unable to start a new game.", response)
+    })
+}
+
+window.add_player = function(channel, player) {
+  channel.push("add_player", player)
+    .receive("error", response => {
+      console.log("Unable to add new player: " + player, response)
+    })
+}
+
+window.position_island = function(channel, player, island, row, col) {
+  var params = {
+    "player": player,
+    "island": island,
+    "row": row,
+    "col": col
+  }
+  channel.push("position_island", params)
+    .receive("ok", response => {
+      console.log("Island positioned!", response)
+    })
+    .receive("error", response => {
+      console.log("Unable to position island.", response)
+    })
+}
+
+window.set_islands = function(channel, player) {
+  channel.push("set_islands", player)
+    .receive("ok", response => {
+      console.log("Here is the board:");
+      console.dir(response.board);
+    })
+    .receive("error", response => {
+      console.log("Unable to set islands for: " + player, response)
+    })
+}
+
+window.guess_coordinate = function(channel, player, row, col) {
+  var params = {
+    "player": player,
+    "row": row,
+    "col": col
+  }
+  channel.push("guess_coordinate", params)
+    .receive("error", response => {
+      console.log("Unable to guess a coordinate: " + player, response)
+    })
+}
 
 /**
  * Paste into browser console:
@@ -113,6 +168,73 @@ game_channel.on(
   "said_hello", 
   response => console.log("Returned Greeting:", response.message)
 )
+**/
+
+/**
+ * Paste into browser console #1:
+ * 
+var game_channel = new_channel("moon", "moon")
+join(game_channel)
+
+new_game(game_channel)
+
+game_channel.on(
+  "player_added", 
+  response => console.log("Player Added", response)
+)
+game_channel.on(
+  "player_set_islands", 
+  response => console.log("Player Set Islands", response)
+)
+game_channel.on(
+  "player_guessed_coordinate", 
+  response => console.log("Player Guessed Coordinate: ", response.result)
+)
+game_channel.on(
+  "subscribers", 
+  response => console.log("These players have joined: ", response)
+)
+
+position_island(game_channel, "player1", "dot", 1, 1)
+
+// When Rules in state: :player1_turn
+guess_coordinate(game_channel, "player1", 10, 1)
+
+// try running new_game(game_channel) repeatedly, to cause :already_started, 
+// and observe channel crashing and rejoining.
+**/
+
+/**
+ * Paste into browser console #2:
+ * 
+var game_channel = new_channel("moon", "diva")
+join(game_channel)
+
+add_player(game_channel, "diva")
+
+game_channel.on(
+  "player_set_islands", 
+  response => console.log("Player Set Islands", response)
+)
+game_channel.on(
+  "player_guessed_coordinate", 
+  response => console.log("Player Guessed Coordinate: ", response.result)
+)
+game_channel.on(
+  "subscribers", 
+  response => console.log("These players have joined: ", response)
+)
+
+position_island(game_channel, "player2", "atoll", 1, 1)
+position_island(game_channel, "player2", "dot", 1, 5)
+position_island(game_channel, "player2", "l_shape", 1, 7)
+position_island(game_channel, "player2", "s_shape", 5, 1)
+position_island(game_channel, "player2", "square", 5, 5)
+
+set_islands(game_channel, "player2")
+
+// Demonstrate that Presence works
+game_channel.push("show_subscribers")
 **/
 
 // Now that you are connected, you can join channels with a topic:
